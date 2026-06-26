@@ -33,26 +33,37 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (existingUser) {
-    throw new ApiError("400", "User with email or username already exist");
+    throw new ApiError(400, "User with email or username already exist");
+  }
+  //   console.log(req.files);
+  const avatarLocalPath = req.files?.avatar[0]?.path;
+  //   const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 1
+  ) {
+    coverImageLocalPath = req.files?.coverImage[0]?.path;
   }
 
-  const avatarLocalPath = req.files?.avatar[0]?.path;
-  const converImageLocalPath = req.files?.avatar[0]?.path;
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is require");
   }
 
   const avatarPath = await uploadOnCloudinary(avatarLocalPath);
-  const converImage = await uploadOnCloudinary(converImageLocalPath);
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  //   console.log(avatarPath)
+  //   console.log("Cloudinary uploaded coverImage", coverImage);
 
-  if (!avatar) {
+  if (!avatarPath) {
     throw new ApiError(400, "Avatar cloudinary upload error");
   }
 
   const user = await User.create({
     fullName,
-    avatar: avatar.url,
-    converImage: converImage?.url || "",
+    avatar: avatarPath.url,
+    coverImage: coverImage?.url || "",
     email,
     password,
     username: username?.toLowerCase(),
