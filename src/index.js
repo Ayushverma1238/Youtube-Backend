@@ -1,19 +1,19 @@
 import dotenv from "dotenv";
 dotenv.config();
+// import express from "express";
+// const app = express();
+import { app } from "./app.js";
 import connectDb from "./db/index.js";
 console.log(process.env.MONGODB_URI);
 connectDb()
-.then(()=>{
-    app.listen(process.env.PORT||8000, ()=>{
-        console.log("Server is running on port", process.env.PORT||8000);
-    })
-})
-.catch((err)=>{
+  .then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+      console.log("Server is running on port", process.env.PORT || 8000);
+    });
+  })
+  .catch((err) => {
     console.error("Error connecting to MongoDB:", err);
-})
-
-
-
+  });
 
 /*
 import mongoose from "mongoose";
