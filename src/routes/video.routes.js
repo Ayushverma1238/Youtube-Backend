@@ -12,8 +12,8 @@ import {
 
 const router = Router();
 
-router.route("/all-videos").get(getAllPublishedVideos);
-router.route("/user-videos").post(verifyJWT, getUserVideos);
+router.route("/all-videos/:pages").get(getAllPublishedVideos);
+router.route("/user-videos/:pages").post(verifyJWT, getUserVideos);
 router.route("get-video-page-detail/:videoId").get(getVideoPageDetail);
 router.route("/delete-video/:videoId").delete(verifyJWT, deleteVideo);
 router.route("/upload-video").post(

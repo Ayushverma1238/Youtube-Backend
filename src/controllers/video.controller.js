@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const getAllPublishedVideos = asyncHandler(async (req, res) => {
+  const { pages } = req.params;
   const videos = await Videos.aggregate([
     {
       $sort: { createdAt: -1 },
@@ -14,6 +15,9 @@ const getAllPublishedVideos = asyncHandler(async (req, res) => {
       $match: {
         isPublish: true,
       },
+    },
+    {
+      $limit: 50 * pages,
     },
     {
       $lookup: {
@@ -233,6 +237,7 @@ const getVideoPageDetail = asyncHandler(async (req, res) => {
 
 const getUserVideos = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
+  const { pages } = req.params;
   const videos = await Videos.aggregate([
     {
       $sort: { createdAt: -1 },
@@ -242,6 +247,9 @@ const getUserVideos = asyncHandler(async (req, res) => {
         isPublish: true,
         owner: new mongoose.Types.ObjectId(userId),
       },
+    },
+    {
+      $limit: 30 * pages,
     },
     {
       $lookup: {
@@ -340,12 +348,10 @@ const deleteVideo = asyncHandler(async (req, res) => {
 });
 
 
-
 export {
   getAllPublishedVideos,
   getVideoPageDetail,
   getUserVideos,
   uploadVideo,
   deleteVideo,
-
 };
