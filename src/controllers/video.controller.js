@@ -6,7 +6,9 @@ import mongoose from "mongoose";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const getAllPublishedVideos = asyncHandler(async (req, res) => {
-  const { pages } = req.params;
+  const page = Number(req.params.pages) || 1;
+  const limit = 50;
+  const skip = (page - 1) * limit;
   const videos = await Videos.aggregate([
     {
       $sort: { createdAt: -1 },
@@ -17,7 +19,10 @@ const getAllPublishedVideos = asyncHandler(async (req, res) => {
       },
     },
     {
-      $limit: 50 * pages,
+      $skip: skip,
+    },
+    {
+      $limit: limit,
     },
     {
       $lookup: {
@@ -237,7 +242,9 @@ const getVideoPageDetail = asyncHandler(async (req, res) => {
 
 const getUserVideos = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
-  const { pages } = req.params;
+  const page = Number(req.params.pages) || 1;
+  const limit = 30;
+  const skip = (page - 1) * limit;
   const videos = await Videos.aggregate([
     {
       $sort: { createdAt: -1 },
@@ -249,7 +256,10 @@ const getUserVideos = asyncHandler(async (req, res) => {
       },
     },
     {
-      $limit: 30 * pages,
+      $skip: skip,
+    },
+    {
+      $limit: limit,
     },
     {
       $lookup: {
@@ -346,7 +356,6 @@ const deleteVideo = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, videoDelete, "Successfully video deleted"));
 });
-
 
 export {
   getAllPublishedVideos,

@@ -5,7 +5,9 @@ import { Tweet } from "../models/tweet.models.js";
 import mongoose from "mongoose";
 
 const getAllTweet = asyncHandler(async (req, res) => {
-    const {pages} = req.params
+  const page = Number(req.params.pages) || 1;
+  const limit = 20;
+  const skip = (page - 1) * limit;
   const tweets = await Tweet.aggregate([
     {
       $sort: {
@@ -13,7 +15,10 @@ const getAllTweet = asyncHandler(async (req, res) => {
       },
     },
     {
-        $limits:20 * pages
+      $skip: skip,
+    },
+    {
+      $limits: limit,
     },
     {
       $lookup: {
@@ -143,7 +148,9 @@ const getAllTweet = asyncHandler(async (req, res) => {
 
 const getUserTweet = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
-  const {pages} = req.params
+  const page = Number(req.params.pages) || 1;
+  const limit = 30;
+  const skip = (page - 1) * limit;
   const tweets = await Tweet.aggregate([
     {
       $sort: {
@@ -156,7 +163,10 @@ const getUserTweet = asyncHandler(async (req, res) => {
       },
     },
     {
-      $limit: 30 * pages,
+      $skip: skip,
+    },
+    {
+      $limit: limit,
     },
     {
       $lookup: {
@@ -276,55 +286,54 @@ const getUserTweet = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if(tweets.length === 0){
-    return res.status(400).json(
-        new ApiResponse(400,[], "User is not posting any tweets")
-    )
+  if (tweets.length === 0) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, [], "User is not posting any tweets"));
   }
-  return res.status(200).json(
-    new ApiResponse(200, tweets, "User tweets fetched")
-  )
+  return res
+    .status(200)
+    .json(new ApiResponse(200, tweets, "User tweets fetched"));
 });
 
 // const getTweet = asyncHandler(async(req, res)=>{})
 
 const deleteTweet = asyncHandler(async (req, res) => {
-    const {tweetId} = req.params;
-    const deletedTweet= await Tweet.findOneAndDelete({
-        _id:tweetId,
-        owner:req.user?._id
-    })
+  const { tweetId } = req.params;
+  const deletedTweet = await Tweet.findOneAndDelete({
+    _id: tweetId,
+    owner: req.user?._id,
+  });
 
-    if(!deletedTweet){
-        throw new ApiResponse(400, "Unauthorized to delete this tweet")
-    }
+  if (!deletedTweet) {
+    throw new ApiResponse(400, "Unauthorized to delete this tweet");
+  }
 
-    return res.status(200).json(
-        new ApiResponse(200, deletedTweet, "Tweet deleted successfully")
-    )
+  return res
+    .status(200)
+    .json(new ApiResponse(200, deletedTweet, "Tweet deleted successfully"));
 });
 
-
 const uploadTweet = asyncHandler(async (req, res) => {
-    const {content} = req.body;
-    const tweet =  await Tweet.create({
-        content,
-        owenr:req.user?._id
-    })
+  const { content } = req.body;
+  const tweet = await Tweet.create({
+    content,
+    owenr: req.user?._id,
+  });
 
-    if(!tweet){
-        throw new ApiError(500, "Something went wrong while uploading a tweet")
-    }
-    return res.status(200).json(
-        new ApiResponse(200, tweet,"Tweet uploaded successfully")
-    )
+  if (!tweet) {
+    throw new ApiError(500, "Something went wrong while uploading a tweet");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, tweet, "Tweet uploaded successfully"));
 });
 
 export {
   getAllTweet,
   getUserTweet,
-//   getTweet,
+  //   getTweet,
   deleteTweet,
-//   updateTweet,
+  //   updateTweet,
   uploadTweet,
 };
